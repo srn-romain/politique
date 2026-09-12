@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   GitBranch,
   FileText,
@@ -29,6 +29,9 @@ export default function Header({
     { id: 'legislatif',          label: 'Parlement' },
     { id: 'controle',            label: 'Contrôle' },
   ];
+
+  // Ref sur le conteneur scrollable des chips — pour le centrage au clic
+  const chipsRef = useRef(null);
 
   return (
     <header className="site-header">
@@ -155,13 +158,32 @@ export default function Header({
             </div>
 
             {/* Filtres par catégorie */}
-            <div className="filter-chips" role="group" aria-label="Filtrer par catégorie">
+            <div
+              className="filter-chips"
+              role="group"
+              aria-label="Filtrer par catégorie"
+              ref={chipsRef}
+            >
               <span className="filter-label">Filtrer :</span>
               {categories.map(cat => (
                 <button
                   key={cat.id}
                   className={`chip${selectedCategory === cat.id ? ' active' : ''}`}
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={e => {
+                    setSelectedCategory(cat.id);
+                    // Centre le chip cliqué dans la zone scrollable
+                    const btn = e.currentTarget;
+                    const container = chipsRef.current;
+                    if (container && btn) {
+                      const btnLeft   = btn.offsetLeft;
+                      const btnWidth  = btn.offsetWidth;
+                      const contWidth = container.offsetWidth;
+                      container.scrollTo({
+                        left: btnLeft - contWidth / 2 + btnWidth / 2,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
                   aria-pressed={selectedCategory === cat.id}
                 >
                   {cat.label}

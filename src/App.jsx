@@ -86,15 +86,9 @@ export default function App() {
     }
   };
 
-  /* ── Nodes mis en valeur via simulation ─────────────────────────────────
-     On ne met en surbrillance que quand l'utilisateur a explicitement cliqué
-     "Afficher l'Organigramme" depuis le simulateur (simLinkedToTree). Cela
-     évite le badge "Étape #1" confus sur l'organigramme en navigation libre.
-  ─────────────────────────────────────────────────────────────────────────── */
-  const [simLinkedToTree, setSimLinkedToTree] = useState(false);
-
   const activeStep         = activePathway?.steps?.[currentStepIndex];
   const highlightedNodeIds = simLinkedToTree ? (activeStep?.highlightNodes || []) : [];
+
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>

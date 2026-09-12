@@ -290,6 +290,24 @@ ul, ol { list-style: none; }
   scrollbar-width: none;
   flex-wrap: nowrap;
   flex: 1;
+  /* Fondu sur les bords pour signaler qu'il y a d'autres chips */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 48px,
+    black calc(100% - 48px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 48px,
+    black calc(100% - 48px),
+    transparent 100%
+  );
+  /* Padding latéral pour compenser le fondu */
+  padding-left: 8px;
+  padding-right: 8px;
 }
 .filter-chips::-webkit-scrollbar { display: none; }
 .filter-label {
