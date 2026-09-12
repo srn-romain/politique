@@ -1,17 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Settings, 
-  Download, 
-  Upload, 
-  RotateCcw, 
-  Save, 
-  Plus, 
-  Trash2, 
-  Edit3, 
-  User, 
-  History, 
-  CheckCircle2, 
-  ArrowRight
+import {
+  Download, Upload, RotateCcw, Save, Plus, Trash2, User, History, CheckCircle2, ArrowRight
 } from 'lucide-react';
 
 export default function AdminEditor({
@@ -20,33 +9,28 @@ export default function AdminEditor({
   onSaveData,
   onResetToDefaults
 }) {
-  const [selectedEntityId, setSelectedEntityId] = useState('presidence');
-  const [localExecutive, setLocalExecutive] = useState(JSON.parse(JSON.stringify(executiveData)));
-  const [localMinistries, setLocalMinistries] = useState(JSON.parse(JSON.stringify(ministriesData)));
-  const [saveNotification, setSaveNotification] = useState('');
+  const [selectedEntityId,  setSelectedEntityId]  = useState('presidence');
+  const [localExecutive,    setLocalExecutive]     = useState(() => JSON.parse(JSON.stringify(executiveData)));
+  const [localMinistries,   setLocalMinistries]    = useState(() => JSON.parse(JSON.stringify(ministriesData)));
+  const [saveNotification,  setSaveNotification]   = useState('');
 
-  const isPresident = selectedEntityId === 'presidence';
-  const isPM = selectedEntityId === 'matignon';
-  const selectedMinistryIndex = !isPresident && !isPM 
+  const isPresident          = selectedEntityId === 'presidence';
+  const isPM                 = selectedEntityId === 'matignon';
+  const selectedMinistryIndex = (!isPresident && !isPM)
     ? localMinistries.findIndex(m => m.id === selectedEntityId)
     : -1;
-
   const currentMinistry = selectedMinistryIndex >= 0 ? localMinistries[selectedMinistryIndex] : null;
 
+  /* ── Helpers de mise à jour ─────────────────────────────── */
   const handleUpdateField = (field, value) => {
     if (isPresident) {
-      setLocalExecutive(prev => ({
-        ...prev,
-        president: { ...prev.president, [field]: value }
-      }));
+      setLocalExecutive(prev => ({ ...prev, president: { ...prev.president, [field]: value } }));
     } else if (isPM) {
-      setLocalExecutive(prev => ({
-        ...prev,
-        primeMinister: { ...prev.primeMinister, [field]: value }
-      }));
+      setLocalExecutive(prev => ({ ...prev, primeMinister: { ...prev.primeMinister, [field]: value } }));
     } else if (currentMinistry) {
       const updated = [...localMinistries];
-      if (['name', 'shortName', 'building', 'address', 'budgetBillions', 'staffCount'].includes(field)) {
+      const ministryFields = ['name', 'shortName', 'building', 'address', 'budgetBillions', 'staffCount'];
+      if (ministryFields.includes(field)) {
         updated[selectedMinistryIndex] = { ...updated[selectedMinistryIndex], [field]: value };
       } else {
         updated[selectedMinistryIndex] = {
@@ -59,24 +43,14 @@ export default function AdminEditor({
   };
 
   const handleAddPredecessor = () => {
-    const newPred = { name: "Nouveau Prédécesseur", period: "2024 - 2026", party: "Parti", highlight: "Action marquante" };
-    
+    const newPred = { name: 'Nouveau Prédécesseur', period: '2024 - 2026', party: 'Parti', highlight: 'Action marquante' };
     if (isPresident) {
-      setLocalExecutive(prev => ({
-        ...prev,
-        president: { ...prev.president, predecessors: [newPred, ...(prev.president.predecessors || [])] }
-      }));
+      setLocalExecutive(prev => ({ ...prev, president: { ...prev.president, predecessors: [newPred, ...(prev.president.predecessors || [])] } }));
     } else if (isPM) {
-      setLocalExecutive(prev => ({
-        ...prev,
-        primeMinister: { ...prev.primeMinister, predecessors: [newPred, ...(prev.primeMinister.predecessors || [])] }
-      }));
+      setLocalExecutive(prev => ({ ...prev, primeMinister: { ...prev.primeMinister, predecessors: [newPred, ...(prev.primeMinister.predecessors || [])] } }));
     } else if (currentMinistry) {
       const updated = [...localMinistries];
-      updated[selectedMinistryIndex] = {
-        ...updated[selectedMinistryIndex],
-        predecessors: [newPred, ...(updated[selectedMinistryIndex].predecessors || [])]
-      };
+      updated[selectedMinistryIndex] = { ...updated[selectedMinistryIndex], predecessors: [newPred, ...(updated[selectedMinistryIndex].predecessors || [])] };
       setLocalMinistries(updated);
     }
   };
@@ -85,22 +59,16 @@ export default function AdminEditor({
     if (isPresident) {
       const preds = [...localExecutive.president.predecessors];
       preds[index] = { ...preds[index], [field]: value };
-      setLocalExecutive(prev => ({
-        ...prev,
-        president: { ...prev.president, predecessors: preds }
-      }));
+      setLocalExecutive(prev => ({ ...prev, president: { ...prev.president, predecessors: preds } }));
     } else if (isPM) {
       const preds = [...localExecutive.primeMinister.predecessors];
       preds[index] = { ...preds[index], [field]: value };
-      setLocalExecutive(prev => ({
-        ...prev,
-        primeMinister: { ...prev.primeMinister, predecessors: preds }
-      }));
+      setLocalExecutive(prev => ({ ...prev, primeMinister: { ...prev.primeMinister, predecessors: preds } }));
     } else if (currentMinistry) {
       const updated = [...localMinistries];
       const preds = [...updated[selectedMinistryIndex].predecessors];
       preds[index] = { ...preds[index], [field]: value };
-      updated[selectedMinistryIndex].predecessors = preds;
+      updated[selectedMinistryIndex] = { ...updated[selectedMinistryIndex], predecessors: preds };
       setLocalMinistries(updated);
     }
   };
@@ -108,19 +76,16 @@ export default function AdminEditor({
   const handleRemovePredecessor = (index) => {
     if (isPresident) {
       const preds = localExecutive.president.predecessors.filter((_, i) => i !== index);
-      setLocalExecutive(prev => ({
-        ...prev,
-        president: { ...prev.president, predecessors: preds }
-      }));
+      setLocalExecutive(prev => ({ ...prev, president: { ...prev.president, predecessors: preds } }));
     } else if (isPM) {
       const preds = localExecutive.primeMinister.predecessors.filter((_, i) => i !== index);
-      setLocalExecutive(prev => ({
-        ...prev,
-        primeMinister: { ...prev.primeMinister, predecessors: preds }
-      }));
+      setLocalExecutive(prev => ({ ...prev, primeMinister: { ...prev.primeMinister, predecessors: preds } }));
     } else if (currentMinistry) {
       const updated = [...localMinistries];
-      updated[selectedMinistryIndex].predecessors = updated[selectedMinistryIndex].predecessors.filter((_, i) => i !== index);
+      updated[selectedMinistryIndex] = {
+        ...updated[selectedMinistryIndex],
+        predecessors: updated[selectedMinistryIndex].predecessors.filter((_, i) => i !== index)
+      };
       setLocalMinistries(updated);
     }
   };
@@ -128,25 +93,14 @@ export default function AdminEditor({
   const handleAddNewMinistry = () => {
     const newId = `ministere_${Date.now()}`;
     const newMinistry = {
-      id: newId,
-      name: "Nouveau Ministère",
-      shortName: "Nouveau Ministère",
-      category: "social_sante",
-      categoryLabel: "Ministère",
-      color: "#000091",
-      icon: "Landmark",
-      building: "Hôtel Ministériel",
-      address: "Paris",
-      budgetBillions: "1.0 Md €",
-      staffCount: "5 000 agents",
+      id: newId, name: 'Nouveau Ministère', shortName: 'Nouveau Ministère',
+      category: 'social_sante', categoryLabel: 'Ministère', color: '#000091',
+      icon: 'Landmark', building: 'Hôtel Ministériel', address: 'Paris',
+      budgetBillions: '1.0 Md €', staffCount: '5 000 agents',
       currentMinister: {
-        name: "Nom du Ministre",
-        title: "Ministre",
-        age: 45,
-        sinceDate: "2026",
-        party: "Sans étiquette",
-        biography: "Parcours du nouveau ministre.",
-        missions: ["Mission 1", "Mission 2"]
+        name: 'Nom du Ministre', title: 'Ministre', age: 45,
+        sinceDate: '2026', party: 'Sans étiquette',
+        biography: 'Parcours du nouveau ministre.', missions: ['Mission 1', 'Mission 2']
       },
       predecessors: []
     };
@@ -156,23 +110,19 @@ export default function AdminEditor({
 
   const handleSaveLive = () => {
     onSaveData(localExecutive, localMinistries);
-    setSaveNotification("Modifications enregistrées avec succès.");
+    setSaveNotification('Modifications enregistrées avec succès.');
     setTimeout(() => setSaveNotification(''), 4000);
   };
 
   const handleExportJSON = () => {
-    const fullData = {
-      executive: localExecutive,
-      ministries: localMinistries
-    };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullData, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "gouvernement.json");
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-
+    const fullData = { executive: localExecutive, ministries: localMinistries };
+    const dataStr  = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(fullData, null, 2));
+    const a = document.createElement('a');
+    a.setAttribute('href', dataStr);
+    a.setAttribute('download', 'gouvernement.json');
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
     setSaveNotification("Fichier 'gouvernement.json' téléchargé avec succès.");
     setTimeout(() => setSaveNotification(''), 4000);
   };
@@ -180,7 +130,6 @@ export default function AdminEditor({
   const handleImportJSON = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
@@ -189,379 +138,401 @@ export default function AdminEditor({
           setLocalExecutive(parsed.executive);
           setLocalMinistries(parsed.ministries);
           onSaveData(parsed.executive, parsed.ministries);
-          setSaveNotification("Fichier JSON importé avec succès.");
+          setSaveNotification('Fichier JSON importé avec succès.');
           setTimeout(() => setSaveNotification(''), 4000);
         } else {
           alert("Structure JSON invalide : doit contenir 'executive' et 'ministries'.");
         }
       } catch (err) {
-        alert("Erreur de lecture du fichier : " + err.message);
+        alert('Erreur de lecture du fichier : ' + err.message);
       }
     };
     reader.readAsText(file);
   };
 
-  const activeEntity = isPresident 
-    ? {
-        name: localExecutive.president.name,
-        title: localExecutive.president.title,
-        age: localExecutive.president.age,
-        party: localExecutive.president.party,
-        sinceDate: localExecutive.president.sinceDate,
-        biography: localExecutive.president.biography,
-        building: localExecutive.president.institution,
-        address: localExecutive.president.address,
-        predecessors: localExecutive.president.predecessors || []
-      }
-    : isPM
-      ? {
-          name: localExecutive.primeMinister.currentHolder,
-          title: localExecutive.primeMinister.title,
-          age: localExecutive.primeMinister.age,
-          party: localExecutive.primeMinister.party,
-          sinceDate: localExecutive.primeMinister.sinceDate,
-          biography: localExecutive.primeMinister.biography,
-          building: localExecutive.primeMinister.institution,
-          address: localExecutive.primeMinister.address,
-          predecessors: localExecutive.primeMinister.predecessors || []
-        }
-      : currentMinistry 
-        ? {
-            name: currentMinistry.currentMinister?.name,
-            title: currentMinistry.currentMinister?.title,
-            age: currentMinistry.currentMinister?.age,
-            party: currentMinistry.currentMinister?.party,
-            sinceDate: currentMinistry.currentMinister?.sinceDate,
-            biography: currentMinistry.currentMinister?.biography,
-            building: currentMinistry.building,
-            address: currentMinistry.address,
-            budgetBillions: currentMinistry.budgetBillions,
-            staffCount: currentMinistry.staffCount,
-            ministryName: currentMinistry.name,
-            predecessors: currentMinistry.predecessors || []
-          }
-        : null;
+  /* ── Entité active pour le formulaire ───────────────────── */
+  const activeEntity = isPresident ? {
+    name: localExecutive.president.name, title: localExecutive.president.title,
+    age: localExecutive.president.age, party: localExecutive.president.party,
+    sinceDate: localExecutive.president.sinceDate, biography: localExecutive.president.biography,
+    building: localExecutive.president.institution, address: localExecutive.president.address,
+    predecessors: localExecutive.president.predecessors || []
+  } : isPM ? {
+    name: localExecutive.primeMinister.currentHolder, title: localExecutive.primeMinister.title,
+    age: localExecutive.primeMinister.age, party: localExecutive.primeMinister.party,
+    sinceDate: localExecutive.primeMinister.sinceDate, biography: localExecutive.primeMinister.biography,
+    building: localExecutive.primeMinister.institution, address: localExecutive.primeMinister.address,
+    predecessors: localExecutive.primeMinister.predecessors || []
+  } : currentMinistry ? {
+    name: currentMinistry.currentMinister?.name, title: currentMinistry.currentMinister?.title,
+    age: currentMinistry.currentMinister?.age, party: currentMinistry.currentMinister?.party,
+    sinceDate: currentMinistry.currentMinister?.sinceDate, biography: currentMinistry.currentMinister?.biography,
+    building: currentMinistry.building, address: currentMinistry.address,
+    budgetBillions: currentMinistry.budgetBillions, staffCount: currentMinistry.staffCount,
+    ministryName: currentMinistry.name,
+    predecessors: currentMinistry.predecessors || []
+  } : null;
+
+  /* ── Styles inline utilitaires (CSS-in-JS léger) ────────── */
+  const inputStyle = {
+    width: '100%', padding: '9px 12px', border: '1px solid var(--grey-300)',
+    borderRadius: 'var(--radius-md)', fontSize: 13.5, color: 'var(--grey-900)',
+    background: 'var(--grey-50)', fontFamily: 'inherit', outline: 'none',
+    boxSizing: 'border-box'
+  };
+  const labelStyle = {
+    display: 'block', fontSize: 11, fontWeight: 800, textTransform: 'uppercase',
+    letterSpacing: '.06em', color: 'var(--grey-700)', marginBottom: 6
+  };
+  const sectionBoxStyle = {
+    background: 'var(--grey-100)', border: '1px solid var(--grey-200)',
+    borderRadius: 'var(--radius-md)', padding: 20, display: 'flex',
+    flexDirection: 'column', gap: 16
+  };
+  const listItemStyle = (selected) => ({
+    padding: '12px 14px', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+    border: selected ? '2px solid var(--blue-rf)' : '1px solid var(--grey-200)',
+    background: selected ? 'var(--blue-rf-light)' : 'var(--grey-50)',
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    gap: 8, transition: 'border-color .15s'
+  });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-      
-      {/* Top Banner */}
-      <div className="p-6 rounded-lg bg-white border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="container admin-view" style={{ paddingTop: 8 }}>
+
+      {/* ── Bannière intro ─────────────────────── */}
+      <div className="section-head">
+        <h2>Gestionnaire des Ministères & Données</h2>
+        <p>
+          Modifiez les représentants et exportez le fichier{' '}
+          <code style={{ background: 'var(--grey-200)', padding: '1px 6px', borderRadius: 4, fontSize: 12 }}>
+            gouvernement.json
+          </code>{' '}
+          pour mettre à jour le site sans toucher au code source.
+        </p>
+      </div>
+
+      {/* ── Avertissement ─────────────────────── */}
+      <div className="admin-warning" style={{ marginBottom: 24 }}>
+        <strong>⚠ Espace administrateur :</strong> Les modifications sont sauvegardées dans votre
+        navigateur (localStorage). Exportez le JSON et placez-le dans <code>public/data/gouvernement.json</code>{' '}
+        pour que les changements soient visibles publiquement sur GitHub Pages.
+      </div>
+
+      {/* ── Barre d'actions globales ─────────── */}
+      <div className="card" style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-[#000091] block mb-1">
-            Administration des Données
+          <span className="badge badge-blue" style={{ marginBottom: 8, display: 'inline-block' }}>
+            Administration des données
           </span>
-          <h2 className="text-2xl font-bold text-gray-900">
-            Gestionnaire des Ministères & Données
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1 max-w-2xl">
-            Modifiez les représentants et téléchargez le fichier <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-800">gouvernement.json</code> pour mettre à jour le site sans toucher au code.
-          </p>
+          <div style={{ fontSize: 13, color: 'var(--grey-700)' }}>
+            {localMinistries.length + 2} entités — dernière sélection :{' '}
+            <code style={{ background: 'var(--grey-150)', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>
+              {selectedEntityId}
+            </code>
+          </div>
         </div>
 
-        {/* Global Actions */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={handleSaveLive}
-            className="px-4 py-2 rounded-md bg-[#000091] hover:bg-[#1212ff] text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors"
-          >
-            <Save className="w-4 h-4" />
-            <span>Enregistrer</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <button className="btn btn-primary" onClick={handleSaveLive}>
+            <Save size={15} /> Enregistrer
           </button>
-
-          <button
-            onClick={handleExportJSON}
-            className="px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-900 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            <span>Exporter JSON</span>
+          <button className="btn btn-ghost" onClick={handleExportJSON}>
+            <Download size={15} /> Exporter JSON
           </button>
-
-          <label className="px-3.5 py-2 rounded-md bg-white hover:bg-gray-50 text-gray-700 font-semibold text-xs sm:text-sm flex items-center gap-2 cursor-pointer border border-gray-300 transition-colors">
-            <Upload className="w-4 h-4 text-gray-500" />
-            <span>Importer JSON</span>
-            <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
+          <label className="btn btn-ghost" style={{ cursor: 'pointer' }}>
+            <Upload size={15} /> Importer JSON
+            <input type="file" accept=".json" onChange={handleImportJSON} style={{ display: 'none' }} />
           </label>
-
           <button
+            className="btn-icon"
             onClick={onResetToDefaults}
-            className="p-2 rounded-md bg-white text-rose-700 hover:bg-rose-50 border border-gray-300 transition-colors"
-            title="Réinitialiser"
+            title="Réinitialiser aux valeurs officielles"
+            style={{ color: 'var(--red-err)' }}
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw size={16} />
           </button>
         </div>
       </div>
 
+      {/* ── Notification de sauvegarde ────────── */}
       {saveNotification && (
-        <div className="p-3.5 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-900 text-sm font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-700 flex-shrink-0" />
-          <span>{saveNotification}</span>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: '#f0fdf4', border: '1px solid #a0e4b7',
+          borderRadius: 'var(--radius-md)', padding: '12px 18px',
+          color: 'var(--green-ok)', fontSize: 13, fontWeight: 600,
+          marginBottom: 24
+        }}>
+          <CheckCircle2 size={16} />
+          {saveNotification}
         </div>
       )}
 
-      {/* Editor Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left List */}
-        <div className="lg:col-span-4 space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">
-              Sélectionner l'entité ({localMinistries.length + 2})
-            </h3>
-            <button
-              onClick={handleAddNewMinistry}
-              className="text-xs font-bold text-[#000091] hover:underline flex items-center gap-1"
-            >
-              <Plus className="w-3 h-3" />
-              Nouveau ministère
-            </button>
-          </div>
+      {/* ── Grille éditeur ───────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 32 }}>
+        <style>{`
+          @media (min-width: 1024px) {
+            .admin-grid { grid-template-columns: 280px 1fr !important; }
+          }
+        `}</style>
+        <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 32 }}>
 
-          <div className="space-y-2 max-h-[640px] overflow-y-auto pr-1">
-            <div
-              onClick={() => setSelectedEntityId('presidence')}
-              className={`p-3 rounded-md cursor-pointer transition-all border flex items-center justify-between ${
-                selectedEntityId === 'presidence'
-                  ? 'bg-blue-50 border-2 border-[#000091]'
-                  : 'bg-white border-gray-200 hover:border-gray-400'
-              }`}
-            >
-              <div>
-                <h4 className="text-xs font-bold text-gray-900">Président de la République</h4>
-                <p className="text-xs text-gray-600">{localExecutive.president.name}</p>
-              </div>
-              <ArrowRight className="w-3.5 h-3.5 text-gray-400" />
-            </div>
-
-            <div
-              onClick={() => setSelectedEntityId('matignon')}
-              className={`p-3 rounded-md cursor-pointer transition-all border flex items-center justify-between ${
-                selectedEntityId === 'matignon'
-                  ? 'bg-blue-50 border-2 border-[#000091]'
-                  : 'bg-white border-gray-200 hover:border-gray-400'
-              }`}
-            >
-              <div>
-                <h4 className="text-xs font-bold text-gray-900">Premier Ministre (Matignon)</h4>
-                <p className="text-xs text-gray-600">{localExecutive.primeMinister.currentHolder}</p>
-              </div>
-              <ArrowRight className="w-3.5 h-3.5 text-gray-400" />
-            </div>
-
-            <div className="pt-2 text-[11px] font-bold uppercase tracking-wider text-gray-400 px-1">
-              Ministères
-            </div>
-
-            {localMinistries.map((ministry) => (
-              <div
-                key={ministry.id}
-                onClick={() => setSelectedEntityId(ministry.id)}
-                className={`p-3 rounded-md cursor-pointer transition-all border flex items-center justify-between ${
-                  selectedEntityId === ministry.id
-                    ? 'bg-blue-50 border-2 border-[#000091]'
-                    : 'bg-white border-gray-200 hover:border-gray-400'
-                }`}
+          {/* ── Sidebar : liste des entités ── */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--grey-500)' }}>
+                Entités ({localMinistries.length + 2})
+              </span>
+              <button
+                onClick={handleAddNewMinistry}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: 'var(--blue-rf)', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
               >
-                <div className="min-w-0 pr-2">
-                  <h4 className="text-xs font-bold text-gray-900 truncate">{ministry.shortName || ministry.name}</h4>
-                  <p className="text-xs text-gray-600 truncate">{ministry.currentMinister?.name}</p>
-                </div>
-                <span className="text-[11px] text-gray-400 font-mono flex-shrink-0">
-                  {ministry.predecessors?.length || 0} préd.
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+                <Plus size={13} /> Nouveau ministère
+              </button>
+            </div>
 
-        {/* Right Form */}
-        <div className="lg:col-span-8 space-y-6">
-          {activeEntity && (
-            <div className="rounded-lg p-6 sm:p-8 bg-white border border-gray-200 shadow-sm space-y-6">
-              
-              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900">
-                  Édition : {isPresident ? "Présidence" : isPM ? "Premier Ministre" : (activeEntity.ministryName || "Ministère")}
-                </h3>
-                <span className="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
-                  {selectedEntityId}
-                </span>
-              </div>
-
-              {!isPresident && !isPM && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Nom Officiel du Ministère
-                    </label>
-                    <input
-                      type="text"
-                      value={activeEntity.ministryName || ''}
-                      onChange={(e) => handleUpdateField('name', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#000091]"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Nom Court / Usuel
-                    </label>
-                    <input
-                      type="text"
-                      value={currentMinistry?.shortName || ''}
-                      onChange={(e) => handleUpdateField('shortName', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#000091]"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Minister details */}
-              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-600 flex items-center gap-2">
-                  <User className="w-4 h-4 text-[#000091]" />
-                  Titulaire en Fonction
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Nom & Prénom
-                    </label>
-                    <input
-                      type="text"
-                      value={activeEntity.name || ''}
-                      onChange={(e) => handleUpdateField(isPresident ? 'name' : isPM ? 'currentHolder' : 'name', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 font-bold focus:outline-none focus:ring-2 focus:ring-[#000091]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Âge
-                    </label>
-                    <input
-                      type="number"
-                      value={activeEntity.age || ''}
-                      onChange={(e) => handleUpdateField('age', parseInt(e.target.value) || '')}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#000091]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Parti / Nuance Politique
-                    </label>
-                    <input
-                      type="text"
-                      value={activeEntity.party || ''}
-                      onChange={(e) => handleUpdateField('party', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#000091]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Date de prise de fonction
-                    </label>
-                    <input
-                      type="text"
-                      value={activeEntity.sinceDate || ''}
-                      onChange={(e) => handleUpdateField('sinceDate', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#000091]"
-                    />
-                  </div>
-                </div>
-
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 640, overflowY: 'auto' }}>
+              {/* Président */}
+              <div
+                style={listItemStyle(selectedEntityId === 'presidence')}
+                onClick={() => setSelectedEntityId('presidence')}
+                role="button" tabIndex={0}
+                onKeyDown={e => e.key === 'Enter' && setSelectedEntityId('presidence')}
+              >
                 <div>
-                  <label className="text-xs font-bold text-gray-700 block mb-1">
-                    Biographie & Parcours Résumé
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={activeEntity.biography || ''}
-                    onChange={(e) => handleUpdateField('biography', e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#000091]"
-                  />
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--grey-900)' }}>Président de la République</div>
+                  <div style={{ fontSize: 11, color: 'var(--grey-500)' }}>{localExecutive.president.name}</div>
                 </div>
+                <ArrowRight size={14} style={{ color: 'var(--grey-400)', flexShrink: 0 }} />
               </div>
 
-              {/* Predecessors */}
-              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-600 flex items-center gap-2">
-                    <History className="w-4 h-4 text-gray-500" />
-                    Historique des Prédécesseurs ({activeEntity.predecessors.length})
-                  </h4>
-                  <button
-                    onClick={handleAddPredecessor}
-                    className="text-xs font-bold text-[#000091] hover:underline flex items-center gap-1"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Ajouter un prédécesseur
+              {/* Premier Ministre */}
+              <div
+                style={listItemStyle(selectedEntityId === 'matignon')}
+                onClick={() => setSelectedEntityId('matignon')}
+                role="button" tabIndex={0}
+                onKeyDown={e => e.key === 'Enter' && setSelectedEntityId('matignon')}
+              >
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--grey-900)' }}>Premier Ministre (Matignon)</div>
+                  <div style={{ fontSize: 11, color: 'var(--grey-500)' }}>{localExecutive.primeMinister.currentHolder}</div>
+                </div>
+                <ArrowRight size={14} style={{ color: 'var(--grey-400)', flexShrink: 0 }} />
+              </div>
+
+              {/* Séparateur Ministères */}
+              <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--grey-400)', padding: '10px 4px 4px' }}>
+                Ministères
+              </div>
+
+              {localMinistries.map(ministry => (
+                <div
+                  key={ministry.id}
+                  style={listItemStyle(selectedEntityId === ministry.id)}
+                  onClick={() => setSelectedEntityId(ministry.id)}
+                  role="button" tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && setSelectedEntityId(ministry.id)}
+                >
+                  <div style={{ minWidth: 0, paddingRight: 8 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--grey-900)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {ministry.shortName || ministry.name}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--grey-500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {ministry.currentMinister?.name}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 10, color: 'var(--grey-400)', fontWeight: 600, flexShrink: 0 }}>
+                    {ministry.predecessors?.length || 0} préd.
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Formulaire d'édition ─────── */}
+          <div>
+            {activeEntity ? (
+              <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+                {/* Titre du formulaire */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 18, borderBottom: '1px solid var(--grey-200)' }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--grey-900)' }}>
+                    Édition :{' '}
+                    {isPresident ? 'Présidence de la République'
+                      : isPM ? 'Premier Ministre'
+                      : (activeEntity.ministryName || 'Ministère')}
+                  </h3>
+                  <code style={{ fontSize: 10, background: 'var(--grey-150)', border: '1px solid var(--grey-200)', borderRadius: 4, padding: '2px 8px', color: 'var(--grey-500)' }}>
+                    id: {selectedEntityId}
+                  </code>
+                </div>
+
+                {/* Nom du ministère (uniquement pour les ministères) */}
+                {!isPresident && !isPM && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div>
+                      <label style={labelStyle}>Nom officiel du ministère</label>
+                      <input
+                        style={inputStyle}
+                        type="text"
+                        value={activeEntity.ministryName || ''}
+                        onChange={e => handleUpdateField('name', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Nom court / usuel</label>
+                      <input
+                        style={inputStyle}
+                        type="text"
+                        value={currentMinistry?.shortName || ''}
+                        onChange={e => handleUpdateField('shortName', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Titulaire en fonction ── */}
+                <div style={sectionBoxStyle}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 11, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--grey-700)', paddingBottom: 12, borderBottom: '1px solid var(--grey-200)' }}>
+                    <User size={14} style={{ color: 'var(--blue-rf)' }} />
+                    Titulaire en fonction
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div>
+                      <label style={labelStyle}>Nom & Prénom</label>
+                      <input
+                        style={{ ...inputStyle, fontWeight: 700 }}
+                        type="text"
+                        value={activeEntity.name || ''}
+                        onChange={e => handleUpdateField(
+                          isPresident ? 'name' : isPM ? 'currentHolder' : 'name',
+                          e.target.value
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Âge</label>
+                      <input
+                        style={inputStyle}
+                        type="number"
+                        value={activeEntity.age || ''}
+                        onChange={e => handleUpdateField('age', parseInt(e.target.value) || '')}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Parti / Nuance politique</label>
+                      <input
+                        style={inputStyle}
+                        type="text"
+                        value={activeEntity.party || ''}
+                        onChange={e => handleUpdateField('party', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Date de prise de fonction</label>
+                      <input
+                        style={inputStyle}
+                        type="text"
+                        value={activeEntity.sinceDate || ''}
+                        onChange={e => handleUpdateField('sinceDate', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Biographie & Parcours résumé</label>
+                    <textarea
+                      style={{ ...inputStyle, resize: 'vertical', minHeight: 80, lineHeight: 1.6 }}
+                      rows={3}
+                      value={activeEntity.biography || ''}
+                      onChange={e => handleUpdateField('biography', e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* ── Prédécesseurs ────────── */}
+                <div style={sectionBoxStyle}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid var(--grey-200)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 11, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--grey-700)' }}>
+                      <History size={14} />
+                      Prédécesseurs ({activeEntity.predecessors.length})
+                    </span>
+                    <button
+                      onClick={handleAddPredecessor}
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', color: 'var(--blue-rf)', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+                    >
+                      <Plus size={13} /> Ajouter
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {activeEntity.predecessors.length === 0 && (
+                      <p style={{ fontSize: 13, color: 'var(--grey-500)', fontStyle: 'italic' }}>
+                        Aucun prédécesseur — cliquez sur "Ajouter" pour en créer un.
+                      </p>
+                    )}
+                    {activeEntity.predecessors.map((pred, idx) => (
+                      <div key={idx} style={{ background: 'var(--grey-50)', border: '1px solid var(--grey-200)', borderRadius: 'var(--radius-md)', padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <input
+                            style={{ ...inputStyle, flex: 1, minWidth: 140, fontWeight: 700 }}
+                            type="text"
+                            value={pred.name || ''}
+                            onChange={e => handleUpdatePredecessor(idx, 'name', e.target.value)}
+                            placeholder="Nom du prédécesseur"
+                          />
+                          <input
+                            style={{ ...inputStyle, width: 140 }}
+                            type="text"
+                            value={pred.period || ''}
+                            onChange={e => handleUpdatePredecessor(idx, 'period', e.target.value)}
+                            placeholder="Période (ex: 2020 - 2024)"
+                          />
+                          <input
+                            style={{ ...inputStyle, width: 130 }}
+                            type="text"
+                            value={pred.party || ''}
+                            onChange={e => handleUpdatePredecessor(idx, 'party', e.target.value)}
+                            placeholder="Parti"
+                          />
+                          <button
+                            onClick={() => handleRemovePredecessor(idx)}
+                            style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid #fac5c7', background: 'var(--red-err-light)', color: 'var(--red-err)', cursor: 'pointer', flexShrink: 0 }}
+                            title="Supprimer ce prédécesseur"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                        <input
+                          style={{ ...inputStyle }}
+                          type="text"
+                          value={pred.highlight || ''}
+                          onChange={e => handleUpdatePredecessor(idx, 'highlight', e.target.value)}
+                          placeholder="Action ou réforme majeure de son mandat"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bouton de sauvegarde */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 8, borderTop: '1px solid var(--grey-200)' }}>
+                  <button className="btn btn-primary" onClick={handleSaveLive}>
+                    <Save size={15} /> Enregistrer les modifications
                   </button>
                 </div>
 
-                <div className="space-y-2">
-                  {activeEntity.predecessors.map((pred, idx) => (
-                    <div key={idx} className="p-3 rounded bg-white border border-gray-200 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <input
-                          type="text"
-                          value={pred.name || ''}
-                          onChange={(e) => handleUpdatePredecessor(idx, 'name', e.target.value)}
-                          placeholder="Nom du prédécesseur"
-                          className="px-2.5 py-1 bg-white border border-gray-300 rounded text-xs font-bold text-gray-900 flex-1 focus:outline-none focus:ring-1 focus:ring-[#000091]"
-                        />
-                        <input
-                          type="text"
-                          value={pred.period || ''}
-                          onChange={(e) => handleUpdatePredecessor(idx, 'period', e.target.value)}
-                          placeholder="Période (ex: 2020 - 2024)"
-                          className="px-2.5 py-1 bg-white border border-gray-300 rounded text-xs text-gray-800 w-32 focus:outline-none focus:ring-1 focus:ring-[#000091]"
-                        />
-                        <input
-                          type="text"
-                          value={pred.party || ''}
-                          onChange={(e) => handleUpdatePredecessor(idx, 'party', e.target.value)}
-                          placeholder="Parti"
-                          className="px-2.5 py-1 bg-white border border-gray-300 rounded text-xs text-gray-600 w-28 hidden sm:inline focus:outline-none focus:ring-1 focus:ring-[#000091]"
-                        />
-                        <button
-                          onClick={() => handleRemovePredecessor(idx)}
-                          className="p-1 rounded text-rose-600 hover:bg-rose-50"
-                          title="Supprimer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <input
-                        type="text"
-                        value={pred.highlight || ''}
-                        onChange={(e) => handleUpdatePredecessor(idx, 'highlight', e.target.value)}
-                        placeholder="Action ou réforme majeure"
-                        className="w-full px-2.5 py-1 bg-white border border-gray-300 rounded text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#000091]"
-                      />
-                    </div>
-                  ))}
-                </div>
               </div>
-
-              {/* Bottom save */}
-              <div className="pt-3 border-t border-gray-200 flex justify-end">
-                <button
-                  onClick={handleSaveLive}
-                  className="px-5 py-2.5 rounded-md bg-[#000091] hover:bg-[#1212ff] text-white font-bold text-sm flex items-center gap-2 shadow-xs transition-colors"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>Enregistrer les modifications</span>
-                </button>
+            ) : (
+              <div className="empty-state">
+                Sélectionnez une entité dans la liste pour l'éditer.
               </div>
+            )}
+          </div>
 
-            </div>
-          )}
         </div>
-
       </div>
 
     </div>

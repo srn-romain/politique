@@ -55,6 +55,7 @@ export default function App() {
   /* ── Simulation ────────────────────────────────────────── */
   const [activePathway,     setActivePathway]     = useState(pathwaysData[0]);
   const [currentStepIndex,  setCurrentStepIndex]  = useState(0);
+  const [simLinkedToTree,   setSimLinkedToTree]   = useState(false);
 
   /* ── Drawer ────────────────────────────────────────────── */
   const [selectedNode,     setSelectedNode]     = useState(null);
@@ -62,8 +63,9 @@ export default function App() {
 
   const handleSelectNode   = (item, type) => { setSelectedNode(item); setSelectedNodeType(type); };
   const handleCloseDrawer  = () => { setSelectedNode(null); setSelectedNodeType(null); };
-  const handleResetSim     = () => setCurrentStepIndex(0);
-  const handleSwitchToTree = () => setActiveTab('tree');
+  const handleResetSim     = () => { setCurrentStepIndex(0); setSimLinkedToTree(false); };
+  const handleSwitchToTree = () => { setSimLinkedToTree(true); setActiveTab('tree'); };
+  const handleGoToSimulator = () => { setSimLinkedToTree(false); setActiveTab('simulator'); };
 
   /* ── Admin save ────────────────────────────────────────── */
   const handleSaveData = (newExec, newMins) => {
@@ -84,9 +86,15 @@ export default function App() {
     }
   };
 
-  /* ── Nodes mis en valeur via simulation ─────────────────── */
-  const activeStep        = activePathway?.steps?.[currentStepIndex];
-  const highlightedNodeIds = activePathway ? (activeStep?.highlightNodes || []) : [];
+  /* ── Nodes mis en valeur via simulation ─────────────────────────────────
+     On ne met en surbrillance que quand l'utilisateur a explicitement cliqué
+     "Afficher l'Organigramme" depuis le simulateur (simLinkedToTree). Cela
+     évite le badge "Étape #1" confus sur l'organigramme en navigation libre.
+  ─────────────────────────────────────────────────────────────────────────── */
+  const [simLinkedToTree, setSimLinkedToTree] = useState(false);
+
+  const activeStep         = activePathway?.steps?.[currentStepIndex];
+  const highlightedNodeIds = simLinkedToTree ? (activeStep?.highlightNodes || []) : [];
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -99,6 +107,7 @@ export default function App() {
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         onResetSimulation={handleResetSim}
+        onGoToSimulator={handleGoToSimulator}
         activePathway={activePathway}
       />
 
@@ -110,7 +119,7 @@ export default function App() {
             ministries={ministries}
             institutions={institutionsData}
             highlightedNodes={highlightedNodeIds}
-            activeStepInfo={activePathway ? activeStep : null}
+            activeStepInfo={simLinkedToTree ? activeStep : null}
             searchQuery={searchQuery}
             selectedCategory={selectedCategory}
             onSelectNode={handleSelectNode}

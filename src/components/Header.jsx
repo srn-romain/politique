@@ -16,6 +16,7 @@ export default function Header({
   selectedCategory,
   setSelectedCategory,
   onResetSimulation,
+  onGoToSimulator,
   activePathway
 }) {
   const categories = [
@@ -87,7 +88,7 @@ export default function Header({
           <button
             id="nav-simulator"
             className={`nav-tab${activeTab === 'simulator' ? ' active' : ''}`}
-            onClick={() => setActiveTab('simulator')}
+            onClick={() => onGoToSimulator ? onGoToSimulator() : setActiveTab('simulator')}
           >
             <FileText size={15} />
             Parcours d'une Loi
