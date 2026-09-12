@@ -290,6 +290,10 @@ ul, ol { list-style: none; }
   scrollbar-width: none;
   flex-wrap: nowrap;
   flex: 1;
+  cursor: pointer;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
   /* Fondu sur les bords pour signaler qu'il y a d'autres chips */
   -webkit-mask-image: linear-gradient(
     to right,
@@ -309,6 +313,10 @@ ul, ol { list-style: none; }
   padding-left: 8px;
   padding-right: 8px;
 }
+.filter-chips.grabbing,
+.filter-chips.grabbing * {
+  cursor: grabbing !important;
+}
 .filter-chips::-webkit-scrollbar { display: none; }
 .filter-label {
   font-size: 12px;
@@ -316,8 +324,10 @@ ul, ol { list-style: none; }
   color: var(--grey-700);
   white-space: nowrap;
   margin-right: 2px;
+  cursor: default;
 }
 .chip {
+  cursor: pointer;
   padding: 5px 13px;
   border-radius: 100px;
   font-size: 12px;

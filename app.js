@@ -1897,8 +1897,51 @@
 
     const chipsWrap = container.querySelector('#filter-chips-wrap');
     if (chipsWrap) {
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+      let hasMoved = false;
+
+      chipsWrap.addEventListener('mousedown', (e) => {
+        isDown = true;
+        hasMoved = false;
+        chipsWrap.classList.add('grabbing');
+        startX = e.pageX - chipsWrap.offsetLeft;
+        scrollLeft = chipsWrap.scrollLeft;
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDown) {
+          isDown = false;
+          chipsWrap.classList.remove('grabbing');
+        }
+      });
+
+      chipsWrap.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - chipsWrap.offsetLeft;
+        const walk = x - startX;
+        if (Math.abs(walk) > 4) {
+          hasMoved = true;
+        }
+        chipsWrap.scrollLeft = scrollLeft - walk;
+      });
+
+      chipsWrap.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          chipsWrap.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+
       chipsWrap.querySelectorAll('.chip').forEach(chip => {
-        chip.addEventListener('click', () => {
+        chip.addEventListener('click', (e) => {
+          if (hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
           const catId = chip.dataset.cat;
           store.setState({ selectedCategory: catId });
           const btnLeft = chip.offsetLeft;
