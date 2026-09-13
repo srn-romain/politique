@@ -184,7 +184,10 @@ ul, ol { list-style: none; }
   align-items: center;
   gap: 0;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
   scrollbar-width: none;
+  scroll-behavior: smooth;
 }
 .header-nav-inner::-webkit-scrollbar { display: none; }
 
@@ -241,6 +244,7 @@ ul, ol { list-style: none; }
 .search-input-wrap {
   position: relative;
   flex: 0 0 360px;
+  max-width: 100%;
 }
 .search-input-wrap .search-icon {
   position: absolute;
@@ -287,6 +291,9 @@ ul, ol { list-style: none; }
   align-items: center;
   gap: 6px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scroll-behavior: smooth;
   scrollbar-width: none;
   flex-wrap: nowrap;
   flex: 1;
@@ -476,6 +483,7 @@ ul, ol { list-style: none; }
   flex-direction: column;
   align-items: center;
   margin-bottom: 48px;
+  padding: 0 16px;
 }
 
 .exec-title {
@@ -1861,3 +1869,409 @@ ul, ol { list-style: none; }
 ::-webkit-scrollbar-track { background: var(--grey-100); }
 ::-webkit-scrollbar-thumb { background: var(--grey-300); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--grey-500); }
+
+/* =========================================================
+   Responsive Design & Optimisations Écrans Mobiles
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* Conteneur global */
+  .container {
+    padding: 0 16px;
+  }
+  .main-content {
+    padding: 20px 0 44px;
+  }
+  .section-head {
+    margin-bottom: 20px;
+  }
+  .section-head h2 {
+    font-size: 19px;
+  }
+  .section-head p {
+    font-size: 13px;
+  }
+
+  /* Barre d'en-tête & Marque RF */
+  .header-brand {
+    padding: 8px 0;
+  }
+  .header-brand-inner {
+    gap: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .brand-block {
+    gap: 10px;
+  }
+  .marianne-flag {
+    width: 36px;
+    height: 24px;
+  }
+  .marianne-text {
+    padding-left: 8px;
+    border-left-width: 2px;
+  }
+  .marianne-text .rf-name {
+    font-size: 9.5px;
+  }
+  .marianne-text .rf-devise {
+    display: none;
+  }
+  .brand-separator {
+    display: none;
+  }
+  .brand-app-name {
+    font-size: 16px;
+  }
+  .brand-app-sub {
+    display: none;
+  }
+  .badge-rf {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  /* Navigation principale horizontale */
+  .header-nav {
+    position: relative;
+  }
+  .header-nav-inner {
+    padding: 0 8px;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+  }
+  .nav-tab {
+    padding: 12px 14px;
+    font-size: 13px;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .nav-tab.nav-settings {
+    margin-left: 0; /* Alignement naturel dans le défilement horizontal */
+  }
+
+  /* Barre de recherche & Filtres */
+  .search-bar {
+    padding: 10px 0;
+  }
+  .search-bar-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .search-input-wrap {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+  .search-input {
+    font-size: 14px;
+    padding: 9px 36px 9px 38px;
+  }
+  .filter-chips {
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    padding-bottom: 2px;
+  }
+  .filter-label {
+    display: none; /* Économie d'espace pour afficher immédiatement les premiers tags */
+  }
+  .chip {
+    padding: 5px 11px;
+    font-size: 11.5px;
+    flex-shrink: 0;
+  }
+
+  /* Organigramme / Arbre */
+  .tree-wrap {
+    padding: 16px 0 32px;
+  }
+  .exec-section {
+    padding: 0 12px;
+    margin-bottom: 32px;
+  }
+  .exec-title {
+    margin-bottom: 20px;
+  }
+  .exec-title h2 {
+    font-size: 18px;
+  }
+  .tree-connector-label {
+    white-space: normal;
+    text-align: center;
+    font-size: 10.5px;
+    padding: 4px 12px;
+    line-height: 1.35;
+  }
+  .tree-section-divider {
+    margin: 14px auto 28px;
+    width: 100%;
+    padding: 0 12px;
+  }
+  .tree-section-divider-text {
+    white-space: normal;
+    text-align: center;
+    font-size: 10px;
+    padding: 4px 12px;
+    line-height: 1.3;
+    max-width: 90%;
+  }
+  .tree-body {
+    gap: 28px;
+  }
+  .tree-col-header {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+  .tree-col-header h3 {
+    font-size: 15px;
+  }
+  .node-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  .node-icon {
+    width: 34px;
+    height: 34px;
+  }
+  .node-card-name {
+    font-size: 13.5px;
+  }
+  .node-rep {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .node-rep-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
+  .node-rep-name {
+    font-size: 13px;
+  }
+  .node-rep-meta {
+    font-size: 11.5px;
+  }
+
+  /* Parcours d'une Loi (Simulateur) */
+  .sim-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .sim-banner-count {
+    align-self: flex-start;
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+  .sim-pathways-grid {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .pathway-card {
+    padding: 16px;
+    gap: 8px;
+  }
+  .pathway-title {
+    font-size: 13.5px;
+  }
+  .stepper-card {
+    padding: 16px 14px;
+  }
+  .stepper-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+  .stepper-title {
+    font-size: 18px;
+  }
+  .stepper-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .steps-tracker {
+    margin-bottom: 18px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+  }
+  .step-dot {
+    min-width: 30px;
+    height: 30px;
+    font-size: 11px;
+  }
+  .step-desc-box {
+    padding: 14px;
+  }
+  .step-keyconcept {
+    padding: 14px;
+  }
+  .step-sidebar-card {
+    padding: 14px;
+  }
+  .step-tree-card {
+    padding: 14px;
+  }
+  .stepper-footer {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 16px;
+  }
+  .stepper-footer .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* Centre de mémos & Quiz */
+  .memos-layout {
+    gap: 20px;
+  }
+  .memo-list-item {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .memo-detail {
+    padding: 16px 14px;
+  }
+  .memo-detail-head {
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+  .memo-detail-icon {
+    width: 36px;
+    height: 36px;
+  }
+  .memo-detail-title {
+    font-size: 18px;
+  }
+  .memo-detail-subtitle {
+    font-size: 13px;
+  }
+  .memo-summary {
+    padding: 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .memo-block {
+    padding: 14px;
+  }
+  .memo-funfact {
+    padding: 14px;
+    font-size: 12.5px;
+  }
+  .quiz-box {
+    padding: 16px 14px;
+  }
+  .quiz-option {
+    padding: 10px 12px;
+    font-size: 12.5px;
+  }
+
+  /* Tiroir latéral (Drawer) sur mobile */
+  .drawer-panel {
+    max-width: 100%;
+    width: 100%;
+  }
+  .drawer-header {
+    padding: 12px 16px;
+  }
+  .drawer-body {
+    padding: 16px 14px;
+    gap: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .drawer-title-card {
+    padding: 16px;
+  }
+  .drawer-title {
+    font-size: 19px;
+  }
+  .drawer-section {
+    padding: 16px;
+    gap: 14px;
+  }
+  .rep-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+  .rep-avatar {
+    width: 42px;
+    height: 42px;
+    font-size: 13px;
+  }
+  .rep-name {
+    font-size: 16px;
+  }
+  .drawer-footer {
+    padding: 12px 16px;
+  }
+
+  /* Élections Présidentielles */
+  .rules-grid {
+    gap: 10px;
+  }
+  .rule-card {
+    padding: 14px;
+  }
+  .cand-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  .cand-name {
+    font-size: 15px;
+  }
+  .elections-table {
+    min-width: 480px;
+  }
+  .elections-table th,
+  .elections-table td {
+    padding: 10px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Mode Éditeur / Admin */
+  .admin-warning {
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+
+  /* Pied de page */
+  .site-footer {
+    padding: 24px 0;
+    margin-top: 24px;
+  }
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .footer-links {
+    gap: 6px 10px;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+  .badge-rf {
+    display: none; /* Évite tout retour à la ligne dans le header sur très petit écran */
+  }
+  .marianne-text {
+    padding-left: 6px;
+  }
+  .marianne-flag {
+    width: 32px;
+    height: 22px;
+  }
+}

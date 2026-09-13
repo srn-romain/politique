@@ -173,6 +173,12 @@ function attachMemoEvents(container, selectedMemo) {
     const handleSelect = () => {
       selectedMemoId = item.dataset.memoId;
       renderMemoCenter(container);
+      if (window.innerWidth < 1024) {
+        const detail = container.querySelector('.memo-detail');
+        if (detail) {
+          detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
     };
     item.addEventListener('click', handleSelect);
     item.addEventListener('keydown', e => e.key === 'Enter' && handleSelect());

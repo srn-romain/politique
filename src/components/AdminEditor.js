@@ -494,6 +494,12 @@ function attachAdminEvents(container, { isPresident, isPM, currentMinistry, sele
     const handleSelect = () => {
       selectedEntityId = item.dataset.entityId;
       renderAdminEditor(container);
+      if (window.innerWidth < 1024) {
+        const formCard = container.querySelector('#admin-save-form-btn')?.closest('.card');
+        if (formCard) {
+          formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
     };
     item.addEventListener('click', handleSelect);
     item.addEventListener('keydown', e => e.key === 'Enter' && handleSelect());

@@ -12,10 +12,219 @@ const categories = [
   { id: 'controle',             label: 'Contrôle' },
 ];
 
+function getSearchBarHtml(searchQuery, selectedCategory) {
+  return `
+    <div class="search-bar">
+      <div class="container search-bar-inner">
+        <!-- Champ de recherche -->
+        <div class="search-input-wrap">
+          ${getIcon('Search', { size: 15, className: 'search-icon' })}
+          <input
+            id="search-input"
+            type="search"
+            class="search-input"
+            value="${escapeHtml(searchQuery)}"
+            placeholder="Rechercher un ministre, ministère, prédécesseur…"
+            aria-label="Rechercher dans l'organigramme"
+          />
+          ${searchQuery ? `
+            <button
+              id="search-clear-btn"
+              class="search-clear"
+              aria-label="Effacer la recherche"
+            >
+              ✕
+            </button>
+          ` : ''}
+        </div>
+
+        <!-- Filtres par catégorie -->
+        <div
+          id="filter-chips-wrap"
+          class="filter-chips"
+          role="group"
+          aria-label="Filtrer par catégorie"
+        >
+          <span class="filter-label">Filtrer :</span>
+          ${categories.map(cat => `
+            <button
+              class="chip${selectedCategory === cat.id ? ' active' : ''}"
+              data-cat="${cat.id}"
+              aria-pressed="${selectedCategory === cat.id}"
+            >
+              ${cat.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function attachSearchBarEvents(searchBar) {
+  const searchInput = searchBar.querySelector('#search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      store.setState({ searchQuery: e.target.value });
+    });
+  }
+
+  const clearBtn = searchBar.querySelector('#search-clear-btn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      store.setState({ searchQuery: '' });
+      if (searchInput) searchInput.focus();
+    });
+  }
+
+  const chipsWrap = searchBar.querySelector('#filter-chips-wrap');
+  if (chipsWrap) {
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    let hasMoved = false;
+
+    chipsWrap.addEventListener('mousedown', (e) => {
+      isDown = true;
+      hasMoved = false;
+      chipsWrap.classList.add('grabbing');
+      startX = e.pageX - chipsWrap.offsetLeft;
+      scrollLeft = chipsWrap.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDown) {
+        isDown = false;
+        chipsWrap.classList.remove('grabbing');
+      }
+    });
+
+    chipsWrap.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - chipsWrap.offsetLeft;
+      const walk = x - startX;
+      if (Math.abs(walk) > 4) {
+        hasMoved = true;
+      }
+      chipsWrap.scrollLeft = scrollLeft - walk;
+    });
+
+    chipsWrap.addEventListener('wheel', (e) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        chipsWrap.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
+
+    chipsWrap.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        if (hasMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        const catId = chip.dataset.cat;
+        store.setState({ selectedCategory: catId });
+
+        // Centre le chip cliqué dans la zone scrollable
+        const btnLeft = chip.offsetLeft;
+        const btnWidth = chip.offsetWidth;
+        const contWidth = chipsWrap.offsetWidth;
+        chipsWrap.scrollTo({
+          left: btnLeft - contWidth / 2 + btnWidth / 2,
+          behavior: 'smooth'
+        });
+      });
+    });
+  }
+}
+
 export function renderHeader(container) {
   const state = store.getState();
   const { activeTab, searchQuery, selectedCategory, activePathway } = state;
 
+  const existingHeader = container.querySelector('.site-header');
+
+  if (existingHeader) {
+    // 1. Mettre à jour les onglets SANS détruire le DOM du header pour préserver le scroll sur mobile
+    const tabs = existingHeader.querySelectorAll('.nav-tab');
+    tabs.forEach(btn => {
+      const isActive = btn.dataset.tab === activeTab;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    // Maintenir l'onglet actif visible et centré dans la barre de navigation sur téléphone
+    const activeBtn = existingHeader.querySelector(`.nav-tab[data-tab="${activeTab}"]`);
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+
+    // 2. Mettre à jour l'indicateur du simulateur si actif
+    const simTab = existingHeader.querySelector('#nav-simulator');
+    if (simTab) {
+      const existingDot = simTab.querySelector('.nav-dot');
+      if (activePathway && !existingDot) {
+        const dot = document.createElement('span');
+        dot.className = 'nav-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        simTab.appendChild(dot);
+      } else if (!activePathway && existingDot) {
+        existingDot.remove();
+      }
+    }
+
+    // 3. Barre de recherche : ajout / retrait / synchronisation
+    let searchBar = existingHeader.querySelector('.search-bar');
+    if (activeTab === 'tree') {
+      if (!searchBar) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = getSearchBarHtml(searchQuery, selectedCategory);
+        searchBar = tmp.firstElementChild;
+        existingHeader.appendChild(searchBar);
+        attachSearchBarEvents(searchBar);
+      } else {
+        const searchInput = searchBar.querySelector('#search-input');
+        if (searchInput && searchInput.value !== searchQuery && document.activeElement !== searchInput) {
+          searchInput.value = searchQuery;
+        }
+
+        let clearBtn = searchBar.querySelector('#search-clear-btn');
+        if (searchQuery && !clearBtn) {
+          const wrap = searchBar.querySelector('.search-input-wrap');
+          if (wrap) {
+            clearBtn = document.createElement('button');
+            clearBtn.id = 'search-clear-btn';
+            clearBtn.className = 'search-clear';
+            clearBtn.setAttribute('aria-label', 'Effacer la recherche');
+            clearBtn.textContent = '✕';
+            clearBtn.addEventListener('click', () => {
+              store.setState({ searchQuery: '' });
+              if (searchInput) searchInput.focus();
+            });
+            wrap.appendChild(clearBtn);
+          }
+        } else if (!searchQuery && clearBtn) {
+          clearBtn.remove();
+        }
+
+        const chips = searchBar.querySelectorAll('.chip');
+        chips.forEach(chip => {
+          const isActive = chip.dataset.cat === selectedCategory;
+          chip.classList.toggle('active', isActive);
+          chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+      }
+    } else {
+      if (searchBar) {
+        searchBar.remove();
+      }
+    }
+    return;
+  }
+
+  // Premier rendu initial
   const html = `
     <header class="site-header">
       <!-- ── Barre Marianne ───────────────────────── -->
@@ -108,57 +317,18 @@ export function renderHeader(container) {
       </nav>
 
       <!-- ── Barre de recherche & filtres (tree uniquement) ── -->
-      ${activeTab === 'tree' ? `
-        <div class="search-bar">
-          <div class="container search-bar-inner">
-            <!-- Champ de recherche -->
-            <div class="search-input-wrap">
-              ${getIcon('Search', { size: 15, className: 'search-icon' })}
-              <input
-                id="search-input"
-                type="search"
-                class="search-input"
-                value="${escapeHtml(searchQuery)}"
-                placeholder="Rechercher un ministre, ministère, prédécesseur…"
-                aria-label="Rechercher dans l'organigramme"
-              />
-              ${searchQuery ? `
-                <button
-                  id="search-clear-btn"
-                  class="search-clear"
-                  aria-label="Effacer la recherche"
-                >
-                  ✕
-                </button>
-              ` : ''}
-            </div>
-
-            <!-- Filtres par catégorie -->
-            <div
-              id="filter-chips-wrap"
-              class="filter-chips"
-              role="group"
-              aria-label="Filtrer par catégorie"
-            >
-              <span class="filter-label">Filtrer :</span>
-              ${categories.map(cat => `
-                <button
-                  class="chip${selectedCategory === cat.id ? ' active' : ''}"
-                  data-cat="${cat.id}"
-                  aria-pressed="${selectedCategory === cat.id}"
-                >
-                  ${cat.label}
-                </button>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-      ` : ''}
+      ${activeTab === 'tree' ? getSearchBarHtml(searchQuery, selectedCategory) : ''}
     </header>
   `;
 
   container.innerHTML = html;
   attachHeaderEvents(container);
+
+  // Défilement centré sur l'onglet actif dès le premier affichage
+  const activeBtn = container.querySelector(`.nav-tab[data-tab="${activeTab}"]`);
+  if (activeBtn) {
+    activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
 }
 
 function attachHeaderEvents(container) {
@@ -188,83 +358,9 @@ function attachHeaderEvents(container) {
     });
   });
 
-  // Search input & clear
-  const searchInput = container.querySelector('#search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      store.setState({ searchQuery: e.target.value });
-    });
-  }
-
-  const clearBtn = container.querySelector('#search-clear-btn');
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      store.setState({ searchQuery: '' });
-      if (searchInput) searchInput.focus();
-    });
-  }
-
-  // Chips click, drag-to-scroll & auto-center
-  const chipsWrap = container.querySelector('#filter-chips-wrap');
-  if (chipsWrap) {
-    let isDown = false;
-    let startX = 0;
-    let scrollLeft = 0;
-    let hasMoved = false;
-
-    chipsWrap.addEventListener('mousedown', (e) => {
-      isDown = true;
-      hasMoved = false;
-      chipsWrap.classList.add('grabbing');
-      startX = e.pageX - chipsWrap.offsetLeft;
-      scrollLeft = chipsWrap.scrollLeft;
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (isDown) {
-        isDown = false;
-        chipsWrap.classList.remove('grabbing');
-      }
-    });
-
-    chipsWrap.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - chipsWrap.offsetLeft;
-      const walk = x - startX;
-      if (Math.abs(walk) > 4) {
-        hasMoved = true;
-      }
-      chipsWrap.scrollLeft = scrollLeft - walk;
-    });
-
-    chipsWrap.addEventListener('wheel', (e) => {
-      if (e.deltaY !== 0) {
-        e.preventDefault();
-        chipsWrap.scrollLeft += e.deltaY;
-      }
-    }, { passive: false });
-
-    chipsWrap.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', (e) => {
-        if (hasMoved) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-        const catId = chip.dataset.cat;
-        store.setState({ selectedCategory: catId });
-
-        // Centre le chip cliqué dans la zone scrollable
-        const btnLeft = chip.offsetLeft;
-        const btnWidth = chip.offsetWidth;
-        const contWidth = chipsWrap.offsetWidth;
-        chipsWrap.scrollTo({
-          left: btnLeft - contWidth / 2 + btnWidth / 2,
-          behavior: 'smooth'
-        });
-      });
-    });
+  const searchBar = container.querySelector('.search-bar');
+  if (searchBar) {
+    attachSearchBarEvents(searchBar);
   }
 }
 
